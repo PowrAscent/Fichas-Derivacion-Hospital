@@ -15,7 +15,7 @@ def login(request):
         check = Usuario.objects.filter(correo = correo, contraseña = hashed)
         if check:
             request.session['estadoSesion'] = True
-            request.session['correo'] = correo.upper() 
+            request.session['correo'] = correo.upper()
             datos = {'correo' : correo}
             return render(request, 'menuA.html', datos)
         else:
