@@ -1,0 +1,10 @@
+.bg-cover{
+    background: url("ocean.jpg") center/cover no-repeat; /* ← reemplaza por tu imagen */
+}
+.card-rounded{
+    border-radius: 1rem;
+}
+.logo{
+    height: 48px;
+    width: auto;
+}
