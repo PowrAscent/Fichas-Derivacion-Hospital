@@ -20,7 +20,11 @@
 
       <!-- Mitad derecha: formulario -->
       <section class="col-12 col-md-6 d-flex align-items-center justify-content-center py-5">
-        <form class="card shadow-sm card-rounded p-4 w-100" style="max-width: 420px;" action="#" method="post" aria-labelledby="login-title">
+         {% if r %}
+          <div class="alert alert-danger">{{ r }}</div>
+         {% endif %}
+        <form class="card shadow-sm card-rounded p-4 w-100" style="max-width: 420px;" action="/login/" method="post" aria-labelledby="login-title">
+          {% csrf_token %}
           <div class="text-center mb-3">
             <img class="logo" src="logo.png" alt="Logo Hospital">
           </div>
@@ -28,8 +32,8 @@
           <h1 id="login-title" class="visually-hidden">Iniciar sesión</h1>
           <!--Input Usuario-->
           <div class="mb-3">
-            <label for="user" class="form-label">Usuario</label>
-            <input id="user" name="usuario" type="text" class="form-control" autocomplete="username" required>
+            <label for="user" class="form-label">Correo</label>
+            <input id="user" name="correo" type="text" class="form-control" autocomplete="username" required>
           </div>
           <!--Input Contraseña-->
           <div class="mb-2">
