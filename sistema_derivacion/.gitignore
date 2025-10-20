@@ -1,1 +1,22 @@
+# Entornos virtuales
+venv/
+env/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Migrations de Django
+*/migrations/
+!*/migrations/__init__.py  # deja solo el archivo __init__.py
+
+# Variables de entorno
 .env
+
+# Archivos del sistema
+.DS_Store
+.idea/
+.vscode/
+*.sqlite3
