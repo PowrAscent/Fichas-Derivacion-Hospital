@@ -94,6 +94,11 @@
 			<div class="login-box">
 				<div class="w-100">
 					<div class="text-center mb-2">
+						{% if rd %}
+						<div class="alert alert-danger">{{rd}}</div>
+						{% endif %} {% if rs %}
+						<div class="alert alert-success">{{rs}}</div>
+						{% endif %}
 						<div class="hospital-logo-text">HOSPITAL REGIONAL DE RANCAGUA</div>
 						{% load static %}
 						<div><img class="logo-formulario" src="{% static "/imagenes/" %}{{img1}}" alt="Logo" /></div>

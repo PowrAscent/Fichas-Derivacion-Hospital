@@ -29,8 +29,20 @@ def login(request):
             elif usuario.rol == 'MEDICO':
                 return render(request, 'menuM.html', datos)
         else:
-            datos = {'r': 'Usuario no encontrado'}
+            datos = {'rd': 'Usuario no encontrado', 'img1' : 'logo_rancagua.png'}
             return render(request, 'login.html', datos)
+    else:
+        datos = {'img1' : 'logo_rancagua.png'}
+        return render(request, 'login.html', datos)
 
 
-
+def logout(request):
+    try:
+        del request.session['estadoSesion']
+        del request.session['correo']
+        del request.session['rol']
+        datos = {'rs':'Sesion cerrada correctamente!', 'img1' : 'logo_rancagua.png'}
+        return render(request, 'login.html', datos)
+    except:
+        datos = {'rd':'La sesion ya está cerrada!', 'img1' : 'logo_rancagua.png'}
+        return render(request, 'login.html', datos)
