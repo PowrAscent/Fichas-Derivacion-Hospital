@@ -5,5 +5,13 @@ class Usuario(models.Model):
     nombre = models.CharField(max_length=30)
     contraseña = models.CharField(max_length=32)
 
+    TIPO_USUARIO = [
+        ('TENSOR', 'tens'),
+        ('AMBULANCIA', 'ambulancia'),
+        ('MEDICO', 'medico'),
+    ]
+
+    rol = models.CharField(max_length=30, choices=TIPO_USUARIO)
+
 def __str__(self):
     return str(self.correo)+"-"+str(self.nombre)+"-"+str(self.contraseña)
