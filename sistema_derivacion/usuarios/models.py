@@ -13,5 +13,3 @@ class Usuario(models.Model):
 
     rol = models.CharField(max_length=30, choices=TIPO_USUARIO)
 
-def __str__(self):
-    return str(self.correo)+"-"+str(self.nombre)+"-"+str(self.contraseña)
