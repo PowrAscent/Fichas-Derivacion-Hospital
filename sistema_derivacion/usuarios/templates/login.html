@@ -95,9 +95,16 @@
 				<div class="w-100">
 					<div class="text-center mb-2">
 						{% if rd %}
-						<div class="alert alert-danger">{{rd}}</div>
+						<div class="alert alert-success alert-dismissible fade show mt-4" role="alert">
+							<h5>{{ rd }}</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+
 						{% endif %} {% if rs %}
-						<div class="alert alert-success">{{rs}}</div>
+						<div class="alert alert-success alert-dismissible fade show mt-4" role="alert">
+							<h5>{{ rs }}</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
 						{% endif %}
 						<div class="hospital-logo-text">HOSPITAL REGIONAL DE RANCAGUA</div>
 						{% load static %}
