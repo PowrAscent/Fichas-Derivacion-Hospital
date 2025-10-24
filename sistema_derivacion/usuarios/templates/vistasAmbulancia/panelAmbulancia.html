@@ -109,6 +109,7 @@
 	</style>
 </head>
 {% load tz %}
+
 <body>
 	<!-- Navbar -->
 	<nav class="navbar navbar-expand-lg navbar-dark">
@@ -129,6 +130,7 @@
 	</nav>
 
 	<!-- Contenido principal -->
+	<!-- Contenido principal -->
 	<main class="main-wrap">
 		<div class="container">
 			<div class="row justify-content-center">
@@ -143,8 +145,8 @@
 							</div>
 							<div class="flex-grow-1">
 								<h1 class="hero-title">Acceso concedido</h1>
-								<p class="hero-subtitle mb-1">Has iniciado sesión correctamente la seccion del
-									<strong>Personal de ambulancia.</strong>.
+								<p class="hero-subtitle mb-1">Has iniciado sesión correctamente en la sección del
+									<strong>Personal de ambulancia</strong>.
 								</p>
 								<small class="text-muted">
 									Último acceso seguro registrado:
@@ -157,8 +159,7 @@
 
 						<hr class="mt-3 mb-4" />
 
-						<!-- Acciones rápidas -->
-						<!-- Acciones rápidas centradas -->
+
 						<div class="center-buttons">
 							<a class="btn btn-gradient px-4 py-2" href="/menuA/">
 								<i class="bi bi-speedometer2 me-2"></i> Ir al panel principal
@@ -166,7 +167,19 @@
 						</div>
 
 
-						<!-- Bloque informativo opcional -->
+						<div class="center-buttons mt-4">
+							<a class="btn btn-outline-primary px-4 py-2" href="/registrar/">
+								<i class="bi bi-pencil-square me-2"></i> Registrar
+							</a>
+							<a class="btn btn-outline-warning px-4 py-2" href="/modificar/">
+								<i class="bi bi-pencil me-2"></i> Modificar
+							</a>
+							<a class="btn btn-outline-info px-4 py-2" href="/listar/">
+								<i class="bi bi-list-ul me-2"></i> Listar
+							</a>
+						</div>
+
+
 						<div class="alert alert-success d-flex align-items-center gap-2 mt-4 mb-0" role="status">
 							<i class="bi bi-shield-lock"></i>
 							<div>
@@ -181,6 +194,7 @@
 			</div>
 		</div>
 	</main>
+
 
 	<script>
 		// Año dinámico del footer
