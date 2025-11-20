@@ -2,6 +2,7 @@ from django.shortcuts import render
 from gestion.models import Usuario
 from gestion.models import Paciente
 from gestion.models import Derivacion
+from gestion.models import HistorialModificacion
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect
 import hashlib
@@ -147,6 +148,14 @@ def modificar(request, id):
             derivacion.gravedad = request.POST.get('gravedad')
             derivacion.evaluacion = request.POST.get('evaluacion')
             derivacion.save()
+
+            usuario_id = request.session.get('id')
+            usuario_modificador = Usuario.objects.get(pk=usuario_id)
+            HistorialModificacion.objects.create(
+                derivacion=derivacion,
+                usuario_modificador=usuario_modificador
+            )
+
             context['r'] = f'Ficha de derivación modificada con éxito para {derivacion.paciente.nombre}.'
         except Exception as e:
             context['r'] = f'Error inesperado: {str(e)}'

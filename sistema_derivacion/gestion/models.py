@@ -12,6 +12,9 @@ class Usuario(models.Model):
     ]
 
     rol = models.CharField(max_length=30, choices=TIPO_USUARIO)
+    def __str__(self):
+        return f"{self.nombre} ({self.correo})"
+
 
 
 class Comorbilidad(models.Model):
@@ -25,6 +28,10 @@ class Paciente(models.Model):
     genero = models.CharField(max_length=1, choices=GENERO_CHOICES)
 
     comorbilidades = models.ManyToManyField(Comorbilidad)
+
+    def __str__(self):
+
+        return f"{self.nombre} (RUT: {self.rut})"
 
 class Derivacion(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
@@ -41,3 +48,29 @@ class Derivacion(models.Model):
 
     def lista_comorbilidades(self):
         return self.paciente.comorbilidades.all()
+
+    def __str__(self):
+
+        return f"Ficha {self.id} de {self.paciente.nombre} (RUT: {self.paciente.rut})"
+
+
+class HistorialModificacion(models.Model):
+    derivacion = models.ForeignKey(
+        'Derivacion',
+        on_delete=models.CASCADE,
+        related_name='historial_modificaciones'
+    )
+    usuario_modificador = models.ForeignKey(
+        'Usuario',
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Usuario Modificador'
+    )
+
+    fecha_modificacion = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha y Hora'
+    )
+
+
+
