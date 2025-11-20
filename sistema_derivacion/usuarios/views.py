@@ -15,12 +15,16 @@ def login(request):
         hashed = hashlib.md5(contraseña.encode('utf-8')).hexdigest()
         usuario = Usuario.objects.filter(correo = correo, contraseña = hashed).first()
 
+        print(hashed)
+
         if usuario:
             request.session['estadoSesion'] = True
             request.session['correo'] = usuario.correo
             request.session['rol'] = usuario.rol
 
             datos = {'correo' : usuario.correo, 'rol': usuario.rol.lower(),  'r': 'Autenticacion exitosa'}
+
+            print(usuario)
 
             if usuario.rol == 'TENS':
                 return render(request, 'menuA.html', datos)
