@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from usuarios.models import Usuario
+from gestion.models import Usuario
 import hashlib
 
 # Create your views here.
