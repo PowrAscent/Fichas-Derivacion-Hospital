@@ -197,3 +197,16 @@ def listar_pacientes(request):
         'rut_buscado': rut_buscado
     }
     return render(request, 'listar_pacientes.html', context)
+
+def historial_derivaciones(request, id):
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
+
+    paciente = Paciente.objects.get(id=id)
+    derivaciones = Derivacion.objects.filter(paciente=paciente).order_by('-fecha_ingreso')
+    context = {
+        'derivaciones': derivaciones,
+        'comorbilidades': paciente.comorbilidades.all(),
+        'paciente': paciente,
+    }
+    return render(request, 'historial_paciente.html', context)
