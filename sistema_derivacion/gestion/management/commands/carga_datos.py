@@ -1,13 +1,62 @@
 import sys
 from django.core.management.base import BaseCommand
-from gestion.models import Paciente, Comorbilidad # Asegúrate de importar tus modelos
+# Importamos make_password para hashear contraseñas
+from django.contrib.auth.hashers import make_password
+from gestion.models import Paciente, Comorbilidad, Usuario # Importamos el modelo Usuario
 
 class Command(BaseCommand):
-    help = 'Precarga datos iniciales de pacientes y comorbilidades.'
+    help = 'Precarga datos iniciales de usuarios, pacientes y comorbilidades.'
 
     def handle(self, *args, **options):
         # -----------------------------
-        # 1. CREAR COMORBILIDADES BASE
+        # 1. CREAR USUARIOS DE PRUEBA
+        # -----------------------------
+        usuarios_data = [
+            {
+                'correo': 'medico@hrr.cl',
+                'nombre': 'Dr. Andrés Bello',
+                'rol': 'MEDICO', # Usamos el valor que se guarda en BD
+                'contraseña_plana': 'passmedico'
+            },
+            {
+                'correo': 'tens@hrr.cl',
+                'nombre': 'Sra. Javiera Cruz',
+                'rol': 'TENS', # Usamos el valor que se guarda en BD
+                'contraseña_plana': 'passtens'
+            },
+            {
+                'correo': 'ambulancia@hrr.cl',
+                'nombre': 'Chofer Juan Pérez',
+                'rol': 'AMBULANCIA', # Usamos el valor que se guarda en BD
+                'contraseña_plana': 'passambu'
+            },
+        ]
+
+        usuarios_map = {}
+        self.stdout.write(self.style.MIGRATE_HEADING("Creando Usuarios de Prueba..."))
+
+        for user_data in usuarios_data:
+            contraseña_hash = make_password(user_data['contraseña_plana'])
+
+            # get_or_create para el usuario
+            usuario, created = Usuario.objects.get_or_create(
+                correo=user_data['correo'],
+                defaults={
+                    'nombre': user_data['nombre'],
+                    'rol': user_data['rol'],
+                    'contraseña': contraseña_hash
+                }
+            )
+            usuarios_map[user_data['rol']] = usuario
+
+            if created:
+                self.stdout.write(f"  👨‍⚕️ Creado: {usuario.nombre} ({usuario.rol})")
+            else:
+                self.stdout.write(f"  ▶️ Ya existe: {usuario.nombre}")
+
+
+        # -----------------------------
+        # 2. CREAR COMORBILIDADES BASE
         # -----------------------------
 
         # Lista de comorbilidades a crear
@@ -20,10 +69,9 @@ class Command(BaseCommand):
         ]
 
         comorbilidades_map = {}
-        self.stdout.write(self.style.MIGRATE_HEADING("Creando Comorbilidades..."))
+        self.stdout.write(self.style.MIGRATE_HEADING("\nCreando Comorbilidades..."))
 
         for nombre in comorbilidades_data:
-            # get_or_create previene duplicados si el comando se ejecuta más de una vez
             comorbilidad, created = Comorbilidad.objects.get_or_create(nombre=nombre)
             comorbilidades_map[nombre] = comorbilidad
             if created:
@@ -32,10 +80,9 @@ class Command(BaseCommand):
                 self.stdout.write(f"  ▶️ Ya existe: {nombre}")
 
         # -----------------------------
-        # 2. CREAR PACIENTES Y VINCULAR COMORBILIDADES
+        # 3. CREAR PACIENTES Y VINCULAR COMORBILIDADES
         # -----------------------------
 
-        # Datos de pacientes con las comorbilidades a asignar
         pacientes_data = [
             {
                 'rut': '11111111-1',
@@ -68,19 +115,18 @@ class Command(BaseCommand):
             # Crear o actualizar el paciente
             paciente, created = Paciente.objects.get_or_create(rut=data['rut'], defaults=data)
 
-            # 3. VINCULAR CON COMORBILIDADES (Many-to-Many)
+            # VINCULAR CON COMORBILIDADES
             comorbilidades_a_vincular = []
             for nombre_com in comorbilidades_nombres:
                 if nombre_com in comorbilidades_map:
                     comorbilidades_a_vincular.append(comorbilidades_map[nombre_com])
 
-            # Asignar la lista de objetos de Comorbilidad al paciente
             paciente.comorbilidades.set(comorbilidades_a_vincular)
 
             if created:
                 self.stdout.write(f"  ✅ Paciente Creado: {paciente.nombre} (Comorbilidades: {', '.join(comorbilidades_nombres)})")
             else:
-                self.stdout.write(f"  ▶️ Paciente Actualizado: {paciente.nombre} (Comorbilidades actualizadas)")
+                self.stdout.write(f"  ▶️ Paciente Actualizado: {paciente.nombre}")
 
 
-        self.stdout.write(self.style.SUCCESS('\nDatos iniciales de pacientes y comorbilidades cargados con éxito!'))
+        self.stdout.write(self.style.SUCCESS('\nDatos iniciales de prueba cargados con éxito!'))

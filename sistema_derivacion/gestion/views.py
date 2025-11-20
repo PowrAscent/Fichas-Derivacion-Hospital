@@ -2,45 +2,50 @@ from django.shortcuts import render
 from gestion.models import Usuario
 from gestion.models import Paciente
 from gestion.models import Derivacion
+from django.contrib.auth.hashers import check_password
+from django.shortcuts import redirect
 import hashlib
 
 # Create your views here.
-def mostrarLogin (request):
-    datos = { 'img1' : 'logo_rancagua.png' }
-    return render(request, 'login.html', datos)
-
 def login(request):
-
     if request.method == 'POST':
-        correo = request.POST['correo']
-        contraseña = request.POST['contraseña']
-        hashed = hashlib.md5(contraseña.encode('utf-8')).hexdigest()
-        usuario = Usuario.objects.filter(correo = correo, contraseña = hashed).first()
+        correo = request.POST.get('correo')
+        contraseña_plana = request.POST.get('contraseña')
 
-        print(hashed)
+        try:
+            usuario = Usuario.objects.get(correo=correo)
+        except Usuario.DoesNotExist:
+            usuario = None
 
         if usuario:
-            request.session['estadoSesion'] = True
-            request.session['correo'] = usuario.correo
-            request.session['rol'] = usuario.rol
-            request.session['id'] = usuario.id
+            if check_password(contraseña_plana, usuario.contraseña):
 
-            datos = {'correo' : usuario.correo, 'rol': usuario.rol.lower(),  'r': 'Autenticacion exitosa'}
+                request.session['estadoSesion'] = True
+                request.session['correo'] = usuario.correo
+                request.session['rol'] = usuario.rol
+                request.session['id'] = usuario.id
 
-            print(usuario)
+                datos = {
+                    'correo': usuario.correo,
+                    'rol': usuario.rol.lower(),
+                    'r': 'Autenticacion exitosa'
+                }
 
-            if usuario.rol == 'TENS':
+                print(f"Usuario logueado: {usuario.nombre} ({usuario.rol})")
+
                 return render(request, 'menuA.html', datos)
-            elif usuario.rol == 'AMBULANCIA':
-                return render(request, 'menuA.html', datos)
-            elif usuario.rol == 'MEDICO':
-                return render(request, 'menuA.html', datos)
+
+            else:
+                datos = {'rd': 'Contraseña incorrecta', 'img1': 'logo_rancagua.png'}
+                return render(request, 'login.html', datos)
+
         else:
-            datos = {'rd': 'Usuario no encontrado', 'img1' : 'logo_rancagua.png'}
+            datos = {'rd': 'Credenciales incorrectas', 'img1': 'logo_rancagua.png'}
             return render(request, 'login.html', datos)
-    else:
-        datos = {'img1' : 'logo_rancagua.png'}
-        return render(request, 'login.html', datos)
+
+    datos = {'img1': 'logo_rancagua.png'}
+    return render(request, 'login.html', datos)
+
 
 
 def logout(request):
@@ -55,18 +60,20 @@ def logout(request):
         return render(request, 'login.html', datos)
 
 def panel(request):
-    if request.session.get('estadoSesion') == True:
-        datos = {
-            'correo': request.session.get('correo'),
-            'rol': request.session.get('rol').lower()
-        }
-        return render(request, 'menuA.html', datos)
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
 
-def mostrar_registrar(request):
-    if request.session.get('estadoSesion') == True:
-        return render(request, 'registrar.html')
+    datos = {
+        'correo': request.session.get('correo'),
+        'rol': request.session.get('rol').lower()
+    }
+    return render(request, 'menuA.html', datos)
+
 
 def registrar(request):
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
+
     context = {}
 
     if request.method == 'POST':
@@ -118,59 +125,75 @@ def registrar(request):
 
         return render(request, 'registrar.html', context)
 
+    return render(request, 'registrar.html', context)
+
 
 def modificar(request, id):
-    if request.session.get('estadoSesion') == True:
-        derivacion = Derivacion.objects.get(id=id)
-        context = {
-            'derivacion': derivacion,
-        }
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
 
-        if request.method == 'POST':
-            try:
-                derivacion.fecha_ingreso = request.POST.get('fecha_ingreso')
-                derivacion.motivo_derivacion = request.POST.get('motivo_derivacion')
-                derivacion.prestacion_requerida = request.POST.get('prestacion_requerida')
-                derivacion.gravedad = request.POST.get('gravedad')
-                derivacion.evaluacion = request.POST.get('evaluacion')
 
-                derivacion.save()
+    derivacion = Derivacion.objects.get(id=id)
+    context = {
+        'derivacion': derivacion,
+    }
 
-                context['r'] = f'Ficha de derivación modificada con éxito para {derivacion.paciente.nombre}.'
-            except Exception as e:
-                context['r'] = f'Error inesperado: {str(e)}'
 
-        return render(request, 'modificar.html', context)
+    if request.method == 'POST':
+        try:
+            derivacion.fecha_ingreso = request.POST.get('fecha_ingreso')
+            derivacion.motivo_derivacion = request.POST.get('motivo_derivacion')
+            derivacion.prestacion_requerida = request.POST.get('prestacion_requerida')
+            derivacion.gravedad = request.POST.get('gravedad')
+            derivacion.evaluacion = request.POST.get('evaluacion')
+            derivacion.save()
+            context['r'] = f'Ficha de derivación modificada con éxito para {derivacion.paciente.nombre}.'
+        except Exception as e:
+            context['r'] = f'Error inesperado: {str(e)}'
+
+    return render(request, 'modificar.html', context)
 
 def listar(request):
-    if request.session.get('estadoSesion') == True:
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
 
-        rut_buscado = request.GET.get('rut', '').strip()
-
-        derivaciones = Derivacion.objects.select_related('paciente').all().order_by('-fecha_ingreso')
-
-
-        if rut_buscado:
-            derivaciones = derivaciones.filter(
-                paciente__rut__icontains=rut_buscado
-            )
-
-        context = {
-            'derivaciones': derivaciones,
-            'rut_buscado': rut_buscado,
-        }
-
-
-
-        return render(request, 'listar.html', context)
+    rut_buscado = request.GET.get('rut', '').strip()
+    derivaciones = Derivacion.objects.select_related('paciente').all().order_by('-fecha_ingreso')
+    if rut_buscado:
+        derivaciones = derivaciones.filter(
+            paciente__rut__icontains=rut_buscado
+        )
+    context = {
+        'derivaciones': derivaciones,
+        'rut_buscado': rut_buscado,
+    }
+    return render(request, 'listar.html', context)
 
 
 def detalle_derivacion(request, id):
-    if request.session.get('estadoSesion') == True:
-        derivacion = Derivacion.objects.get(id=id)
-        context = {
-            'derivacion': derivacion,
-            'comorbilidades': derivacion.paciente.comorbilidades.all(),
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
 
-        }
-        return render(request, 'detalle_derivacion.html', context)
+    derivacion = Derivacion.objects.get(id=id)
+    context = {
+        'derivacion': derivacion,
+        'comorbilidades': derivacion.paciente.comorbilidades.all(),
+    }
+    return render(request, 'detalle_derivacion.html', context)
+
+def listar_pacientes(request):
+    if request.session.get('estadoSesion') != True or request.session.get('rol') != 'MEDICO':
+        return redirect('/login/')
+
+    rut_buscado = request.GET.get('rut', '').strip()
+
+    pacientes = Paciente.objects.all().prefetch_related('comorbilidades').order_by('id')
+
+    if rut_buscado:
+        pacientes = pacientes.filter(rut__icontains=rut_buscado)
+
+    context = {
+        'pacientes': pacientes,
+        'rut_buscado': rut_buscado
+    }
+    return render(request, 'listar_pacientes.html', context)
