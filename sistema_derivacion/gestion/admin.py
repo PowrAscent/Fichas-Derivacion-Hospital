@@ -1,6 +1,7 @@
 from django.contrib import admin
-
+from django.contrib.auth.hashers import make_password
 from gestion.models import HistorialModificacion
+from gestion.models import Usuario
 from django.utils.html import format_html
 from django.urls import reverse
 @admin.register(HistorialModificacion)
@@ -34,3 +35,35 @@ class HistorialModificacionAdmin(admin.ModelAdmin):
             return f'Ficha #{obj.derivacion.id}'
 
     derivacion_link.short_description = 'ID Ficha'
+
+
+@admin.register(Usuario)
+class UsuarioAdmin(admin.ModelAdmin):
+    list_display = ('correo', 'nombre', 'rol')
+    list_filter = ('rol',)
+    search_fields = ('correo', 'nombre')
+
+    fieldsets = (
+        (None, {'fields': ('correo', 'nombre', 'contraseña', 'rol')}),
+    )
+
+
+    def save_model(self, request, obj, form, change):
+
+        if obj.pk:
+            try:
+                original_obj = Usuario.objects.get(pk=obj.pk)
+                old_password = original_obj.contraseña
+            except Usuario.DoesNotExist:
+                old_password = None
+        else:
+            old_password = None
+
+
+        if obj.contraseña != old_password and not obj.contraseña.startswith('pbkdf2_sha256$'):
+
+
+            obj.contraseña = make_password(obj.contraseña)
+
+
+        super().save_model(request, obj, form, change)

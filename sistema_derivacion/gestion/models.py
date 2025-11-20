@@ -6,7 +6,7 @@ class Usuario(models.Model):
     contraseña = models.CharField(max_length=128)
 
     TIPO_USUARIO = [
-        ('TENSOR', 'tens'),
+        ('TENS', 'tens'),
         ('AMBULANCIA', 'ambulancia'),
         ('MEDICO', 'medico'),
     ]

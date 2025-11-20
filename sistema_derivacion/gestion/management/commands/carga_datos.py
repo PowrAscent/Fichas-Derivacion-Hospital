@@ -15,19 +15,19 @@ class Command(BaseCommand):
             {
                 'correo': 'medico@hrr.cl',
                 'nombre': 'Dr. Andrés Bello',
-                'rol': 'MEDICO', # Usamos el valor que se guarda en BD
+                'rol': 'MEDICO',
                 'contraseña_plana': 'passmedico'
             },
             {
                 'correo': 'tens@hrr.cl',
                 'nombre': 'Sra. Javiera Cruz',
-                'rol': 'TENS', # Usamos el valor que se guarda en BD
+                'rol': 'TENS',
                 'contraseña_plana': 'passtens'
             },
             {
                 'correo': 'ambulancia@hrr.cl',
                 'nombre': 'Chofer Juan Pérez',
-                'rol': 'AMBULANCIA', # Usamos el valor que se guarda en BD
+                'rol': 'AMBULANCIA',
                 'contraseña_plana': 'passambu'
             },
         ]
