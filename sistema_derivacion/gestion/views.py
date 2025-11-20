@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from gestion.models import Usuario
+from gestion.models import Paciente
+from gestion.models import Derivacion
 import hashlib
 
 # Create your views here.
@@ -21,6 +23,7 @@ def login(request):
             request.session['estadoSesion'] = True
             request.session['correo'] = usuario.correo
             request.session['rol'] = usuario.rol
+            request.session['id'] = usuario.id
 
             datos = {'correo' : usuario.correo, 'rol': usuario.rol.lower(),  'r': 'Autenticacion exitosa'}
 
@@ -59,78 +62,90 @@ def panel(request):
         }
         return render(request, 'menuA.html', datos)
 
-def registrar(request):
+def mostrar_registrar(request):
     if request.session.get('estadoSesion') == True:
-        datos = {
-            'correo': request.session.get('correo'),
-            'rol': request.session.get('rol').lower(),
-        }
-        if request.method == 'POST':
-            datos['r'] = 'Ficha registrada con exito'
-            return render(request, 'registrar.html', datos)
-        return render(request, 'registrar.html', datos)
+        return render(request, 'registrar.html')
 
-def modificar(request):
-    if 'estadoSesion' in request.session:
-        datos = {
-            'correo': request.session.get('correo'),
-            'rol': request.session.get('rol').lower()
-        }
-        if request.method == 'POST':
-            datos['r'] = 'Ficha modificada con exito'
-            return render(request, 'modificar.html', datos)
+def registrar(request):
+    context = {}
 
-        return render(request, 'modificar.html', datos)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'search':
+            rut = request.POST.get('rut', '').strip()
+            context['rut_buscado'] = rut
+
+            if rut:
+                try:
+                    paciente = Paciente.objects.get(rut=rut)
+                    context['paciente_encontrado'] = paciente
+                    context['comorbilidades_list'] = paciente.comorbilidades.all()
+                except Paciente.DoesNotExist:
+                    context['r'] = 'Paciente no encontrado.'
+
+
+        elif action == 'register':
+            paciente_id = request.POST.get('paciente_id')
+
+
+            if not paciente_id:
+                context['r'] = 'Error: No se ha encontrado un paciente válido para la derivación.'
+                return render(request, 'registrar.html', context)
+
+            try:
+                paciente = Paciente.objects.get(pk=paciente_id)
+                usuario_id = request.session.get('id')
+                usuario_creador = Usuario.objects.get(pk=usuario_id)
+
+                Derivacion.objects.create(
+                    paciente=paciente,
+                    usuario_creador=usuario_creador,
+                    fecha_ingreso=request.POST.get('fecha_ingreso'),
+                    tipo_prevision=request.POST.get('prevision'),
+                    accidente_laboral=request.POST.get('accidente_laboral') == 'True',
+                    motivo_derivacion=request.POST.get('motivo_derivacion'),
+                    prestacion_requerida=request.POST.get('prestacion_requerida'),
+                    gravedad=request.POST.get('gravedad'),
+                    evaluacion=request.POST.get('evaluacion'),
+                )
+                context['r'] = f'Ficha de derivación registrada con éxito para {paciente.nombre}.'
+
+            except Paciente.DoesNotExist:
+                 context['r'] = 'El paciente referenciado no existe.'
+            except Exception as e:
+                context['r'] = f'Error inesperado: {str(e)}'
+
+        return render(request, 'registrar.html', context)
+
+
+def modificar(request, id):
+    if request.session.get('estadoSesion') == True:
+        derivacion = Derivacion.objects.get(id=id)
+        context = {
+            'derivacion': derivacion,
+        }
+        return render(request, 'modificar.html', context)
 
 def listar(request):
-    if 'estadoSesion' in request.session:
-        # Simulando datos de paciente y derivaciones (estos datos serán estáticos solo para maquetado)
-        paciente = {
-            'rut': '12.345.678-9',
-            'nombre': 'Juan Pérez',
-            'edad': 30,
-            'genero': 'Masculino',
-            'comorbilidades': 'Hipertensión',
-            'funcionalidad': 'Independiente'
+    if request.session.get('estadoSesion') == True:
+
+        rut_buscado = request.GET.get('rut', '').strip()
+
+        derivaciones = Derivacion.objects.select_related('paciente').all().order_by('-fecha_ingreso')
+
+
+        if rut_buscado:
+            derivaciones = derivaciones.filter(
+                paciente__rut__icontains=rut_buscado
+            )
+
+        context = {
+            'derivaciones': derivaciones,
+            'rut_buscado': rut_buscado,
         }
 
-        derivaciones = [
-            {
-                'id':1,
-                'fecha_ingreso': '2025-10-22',
-                'tipo_prevision': 'Fonasa',
-                'accidente_laboral': 'No',
-                'motivo_derivacion': 'Dolor torácico',
-                'prestacion_requerida': 'Ecocardiograma',
-                'evaluacion': 'Estable, control ambulatorio',
-                'estado': 'Registrada'
-            },
-            {
-                'id':2,
-                'fecha_ingreso': '2025-10-23',
-                'tipo_prevision': 'Isapre',
-                'accidente_laboral': 'Sí',
-                'motivo_derivacion': 'Fractura de pierna',
-                'prestacion_requerida': 'Radiografía',
-                'evaluacion': 'Urgente, en espera de cirugía',
-                'estado': 'En traslado'
-            }
-        ]
 
-        datos = {
-            'correo': request.session.get('correo'),
-            'rol': request.session.get('rol').lower(),
-            'paciente': paciente,
-            'derivaciones': derivaciones
-        }
 
-        return render(request, 'listar.html', datos)
+        return render(request, 'listar.html', context)
 
-"""def listar(request):
-    if 'estadoSesion' in request.session:
-        datos = {
-            'correo': request.session.get('correo'),
-            'rol': request.session.get('rol').lower(),
-        }
-        return render(request, 'listar.html', datos)
-"""

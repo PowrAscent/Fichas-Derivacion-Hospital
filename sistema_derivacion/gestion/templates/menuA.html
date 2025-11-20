@@ -120,7 +120,8 @@
 				</a>
 				<div class="ms-auto d-flex align-items-center gap-3">
 					<span class="navbar-text text-white-50 small">
-						Bienvenido, <strong>{{ correo }}</strong> — Rol: <span class="badge rounded-pill badge-hrr">{{ rol }}</span>
+						Bienvenido, <strong>{{ correo }}</strong> — Rol:
+						<span class="badge rounded-pill badge-hrr">{{ request.session.rol }}</span>
 					</span>
 					<a href="/logout/" class="btn btn-outline-light btn-sm" aria-label="Cerrar sesión">
 						<i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
@@ -168,7 +169,7 @@
 
 							<div class="center-buttons mt-4 d-flex justify-content-center gap-3">
 								{% if rol != "medico" %}
-								<a class="btn btn-outline-primary px-4 py-2" href="/registrar/">
+								<a class="btn btn-outline-primary px-4 py-2" href="/mostrar_registrar/">
 									<i class="bi bi-pencil-square me-2"></i> Registrar
 								</a>
 								{% endif %}

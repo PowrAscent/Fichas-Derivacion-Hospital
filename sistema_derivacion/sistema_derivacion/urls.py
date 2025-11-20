@@ -9,7 +9,8 @@ urlpatterns = [
     path('', views.mostrarLogin),
     path('panel/', views.panel),
     path('registrar/', views.registrar),
-    path('modificar/', views.modificar),
+    path('mostrar_registrar/', views.mostrar_registrar),
+    path('modificar/<int:id>/', views.modificar),
     path('listar/', views.listar),
 
 ]

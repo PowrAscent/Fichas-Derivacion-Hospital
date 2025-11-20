@@ -3,13 +3,10 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Registrar Paciente — HRR</title>
+		<title>Registrar Ficha — HRR</title>
 
-		<!-- Bootstrap -->
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-		<!-- Bootstrap Icons -->
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-		<!-- Google Fonts: Roboto -->
 		<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
 		<style>
@@ -86,16 +83,39 @@
 				margin: 0 auto;
 			}
 
+			/* Estilo para los datos solo lectura */
+			.read-only-data {
+				background-color: #f0f3f8;
+				border-radius: 8px;
+				padding: 1.5rem;
+				border: 1px solid #dcdfe4;
+			}
+
+			.read-only-data strong {
+				color: var(--hrr-dark-green);
+				font-weight: 500;
+			}
+
 			/* Footer */
 			.footer {
 				color: #6b7260;
+			}
+			.badge-hrr {
+				background: rgba(105, 135, 27, 0.12);
+				color: var(--hrr-dark-green);
+				border: 1px solid rgba(105, 135, 27, 0.25);
+			}
+
+			/* Estilo para el grupo de formulario deshabilitado por falta de paciente */
+			#ficha-derivacion-campos.disabled {
+				pointer-events: none; /* Deshabilita clics en todo el contenedor */
+				opacity: 0.6; /* Hace que se vea atenuado */
 			}
 		</style>
 	</head>
 	{% load tz %}
 
 	<body>
-		<!-- Navbar -->
 		<nav class="navbar navbar-expand-lg navbar-dark">
 			<div class="container">
 				<a class="navbar-brand d-flex align-items-center gap-2" href="/panel/" aria-label="Ir al menú principal">
@@ -104,7 +124,8 @@
 				</a>
 				<div class="ms-auto d-flex align-items-center gap-3">
 					<span class="navbar-text text-white-50 small">
-						Bienvenido, <strong>{{ correo }}</strong> — Rol: <span class="badge rounded-pill badge-hrr">{{ rol }}</span>
+						Bienvenido, <strong>{{ request.session.correo }}</strong> — Rol:
+						<span class="badge rounded-pill badge-hrr">{{ request.session.rol }}</span>
 					</span>
 					<a href="/logout/" class="btn btn-outline-light btn-sm" aria-label="Cerrar sesión">
 						<i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
@@ -113,118 +134,165 @@
 			</div>
 		</nav>
 
-		<!-- Contenido principal -->
 		<main class="main-wrap">
 			<div class="container">
 				<div class="row justify-content-center">
 					<div class="col-12 col-md-10 col-lg-7">
 						<div class="card card-hrr">
-							<h1 class="hero-title">Registrar Paciente</h1>
-							<p class="hero-subtitle mb-4">Complete los campos a continuación para registrar un nuevo paciente.</p>
+							<h1 class="hero-title">Registrar Ficha de Derivación</h1>
+							<p class="hero-subtitle mb-4">
+								Primero, busque al paciente por RUT. Luego, complete la información de la derivación.
+							</p>
+
 							{% if r %}
-							<div class="alert alert-success alert-dismissible fade show" role="alert">
+							<div
+								class="alert alert-{% if 'Error' in r %}danger{% else %}success{% endif %} alert-dismissible fade show"
+								role="alert"
+							>
 								<h5>{{ r }}</h5>
 								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							</div>
 							{% endif %}
 
-							<!-- Formulario de Registro -->
 							<form method="POST" action="/registrar/">
 								{% csrf_token %}
-								<div class="mb-3">
-									<label for="rut" class="form-label">RUT</label>
-									<input
-										type="text"
-										class="form-control"
-										id="rut"
-										name="rut"
-										required
-										placeholder="Ingrese el RUT del paciente"
-									/>
-								</div>
-								<div class="mb-3">
-									<label for="fecha_ingreso" class="form-label">Fecha de Ingreso</label>
-									<input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" required />
-								</div>
-								<div class="mb-3">
-									<label for="prevision" class="form-label">Tipo de Previsión</label>
-									<select class="form-select" id="prevision" name="prevision" required>
-										<option value="">Seleccione una opción</option>
-										<option value="Fonasa">Fonasa</option>
-										<option value="Isapre">Isapre</option>
-										<option value="Particular">Particular</option>
-									</select>
-								</div>
-								<div class="mb-3">
-									<label for="accidente_laboral" class="form-label">¿Accidente Laboral?</label>
-									<select class="form-select" id="accidente_laboral" name="accidente_laboral" required>
-										<option value="">Seleccione una opción</option>
-										<option value="Sí">Sí</option>
-										<option value="No">No</option>
-									</select>
-								</div>
-								<div class="mb-3">
-									<label for="genero" class="form-label">Género</label>
-									<select class="form-select" id="genero" name="genero" required>
-										<option value="">Seleccione una opción</option>
-										<option value="Masculino">Masculino</option>
-										<option value="Femenino">Femenino</option>
-										<option value="Otro">Otro</option>
-									</select>
-								</div>
-								<div class="mb-3">
-									<label for="edad" class="form-label">Edad</label>
-									<input
-										type="number"
-										class="form-control"
-										id="edad"
-										name="edad"
-										required
-										placeholder="Ingrese la edad del paciente"
-									/>
-								</div>
-								<div class="mb-3">
-									<label for="comorbilidades" class="form-label">Comorbilidades</label>
-									<textarea class="form-control" id="comorbilidades" name="comorbilidades" rows="3" required></textarea>
-								</div>
+
+								<h4 class="mb-3 text-secondary border-bottom pb-2">
+									<i class="bi bi-search me-2"></i> Búsqueda y Datos del Paciente
+								</h4>
 
 								<div class="mb-3">
-									<label for="motivo_derivacion" class="form-label">Motivo de Derivación</label>
-									<textarea
-										class="form-control"
-										id="motivo_derivacion"
-										name="motivo_derivacion"
-										rows="3"
-										required
-									></textarea>
+									<label for="rut" class="form-label">RUT del Paciente</label>
+									<div class="input-group">
+										<input
+											type="text"
+											class="form-control"
+											id="rut"
+											name="rut"
+											required
+											placeholder="Ingrese el RUT del paciente (ej: 12345678-9)"
+											value="{{ rut_buscado|default:'' }}"
+										/>
+										<button
+											class="btn btn-outline-primary"
+											type="submit"
+											name="action"
+											value="search"
+											title="Buscar Paciente"
+											formnovalidate
+										>
+											<i class="bi bi-search"></i> Buscar
+										</button>
+									</div>
+
+									<div id="datos-paciente-container" class="mt-3">
+										{% if paciente_encontrado %}
+										<div class="read-only-data">
+											<h5 class="text-success mb-2"><i class="bi bi-person-check-fill me-2"></i> Paciente Cargado</h5>
+											<div class="row">
+												<div class="col-md-6 mb-2"><strong>Nombre:</strong> {{ paciente_encontrado.nombre }}</div>
+												<div class="col-md-6 mb-2"><strong>RUT:</strong> {{ paciente_encontrado.rut }}</div>
+												<div class="col-md-6 mb-2"><strong>Edad:</strong> {{ paciente_encontrado.edad }} años</div>
+												<div class="col-md-6 mb-2"><strong>Género:</strong> {{ paciente_encontrado.genero }}</div>
+											</div>
+											<div class="mt-2 border-top pt-2">
+												<strong>Comorbilidades:</strong>
+												{% for com in comorbilidades_list %}
+												<span class="badge text-bg-warning me-1">{{ com.nombre }}</span>
+												{% empty %} Ninguna registrada. {% endfor %}
+											</div>
+										</div>
+										{% else %}
+										<div class="alert alert-info small" role="alert">
+											Ingrese el RUT y presione <i class="bi bi-search"></i> para cargar los datos y habilitar el formulario.
+										</div>
+										{% endif %}
+									</div>
 								</div>
-								<div class="mb-3">
-									<label for="prestacion_requerida" class="form-label">Prestación Requerida</label>
-									<input
-										type="text"
-										class="form-control"
-										id="prestacion_requerida"
-										name="prestacion_requerida"
-										required
-										placeholder="Ingrese la prestación requerida"
-									/>
+
+								<input type="hidden" name="paciente_id" value="{{ paciente_encontrado.id|default:'' }}" />
+
+								<h4 class="mb-3 mt-5 text-secondary border-bottom pb-2">
+									<i class="bi bi-file-earmark-medical me-2"></i> Información de la Derivación
+								</h4>
+
+								<div id="ficha-derivacion-campos" class="{% if not paciente_encontrado %}disabled{% endif %}">
+									<div class="mb-3">
+										<label for="fecha_ingreso" class="form-label">Fecha de Ingreso</label>
+										<input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" required />
+									</div>
+									<div class="mb-3">
+										<label for="prevision" class="form-label">Tipo de Previsión</label>
+										<select class="form-select" id="prevision" name="prevision" required>
+											<option value="">Seleccione una opción</option>
+											<option value="FONASA">FONASA</option>
+											<option value="ISAPRE">ISAPRE</option>
+										</select>
+									</div>
+									<div class="mb-3">
+										<label for="accidente_laboral" class="form-label">¿Accidente Laboral?</label>
+										<select class="form-select" id="accidente_laboral" name="accidente_laboral" required>
+											<option value="">Seleccione una opción</option>
+											<option value="True">Sí</option>
+											<option value="False">No</option>
+										</select>
+									</div>
+
+									<div class="mb-3">
+										<label for="motivo_derivacion" class="form-label">Motivo de Derivación</label>
+										<textarea
+											class="form-control"
+											id="motivo_derivacion"
+											name="motivo_derivacion"
+											rows="3"
+											required
+										></textarea>
+									</div>
+									<div class="mb-3">
+										<label for="prestacion_requerida" class="form-label">Prestación Requerida</label>
+										<input
+											type="text"
+											class="form-control"
+											id="prestacion_requerida"
+											name="prestacion_requerida"
+											required
+											placeholder="Ingrese la prestación requerida"
+										/>
+									</div>
+									<div class="mb-3">
+										<label for="gravedad" class="form-label">Gravedad</label>
+										<select class="form-select" id="gravedad" name="gravedad" required>
+											<option value="">Seleccione una opción</option>
+											<option value="ALTA">Alta</option>
+											<option value="MEDIA">Media</option>
+											<option value="BAJA">Baja</option>
+											<option value="CRITICA">Crítica</option>
+										</select>
+									</div>
+									<div class="mb-3">
+										<label for="evaluacion" class="form-label">Evaluación</label>
+										<textarea class="form-control" id="evaluacion" name="evaluacion" rows="3" required></textarea>
+									</div>
+
+									<div class="center-buttons">
+										<button
+											type="submit"
+											class="btn btn-gradient px-4 py-2"
+											name="action"
+											value="register"
+											{%
+											if
+											not
+											paciente_encontrado
+											%}disabled{%
+											endif
+											%}
+										>
+											Registrar Ficha
+										</button>
+									</div>
 								</div>
-								<div class="mb-3">
-									<label for="gravedad" class="form-label">Gravedad</label>
-									<select class="form-select" id="gravedad" name="gravedad" required>
-										<option value="">Seleccione una opción</option>
-										<option value="Alta">Alta</option>
-										<option value="Media">Media</option>
-										<option value="Baja">Baja</option>
-									</select>
-								</div>
-								<div class="mb-3">
-									<label for="evaluacion" class="form-label">Evaluación</label>
-									<textarea class="form-control" id="evaluacion" name="evaluacion" rows="3" required></textarea>
-								</div>
-								<div class="center-buttons">
-									<button type="submit" class="btn btn-gradient px-4 py-2">Registrar Paciente</button>
-								</div>
+
 								<div class="center-buttons mt-3">
 									<a href="/panel/" class="btn btn-outline-secondary px-4 py-2">
 										<i class="bi bi-arrow-left me-2"></i> Volver al menú principal
@@ -244,6 +312,14 @@
 		<script>
 			// Año dinámico del footer
 			document.getElementById('y').textContent = new Date().getFullYear();
+
+			// Script para prevenir el envío accidental si la ficha está deshabilitada (UX extra)
+			document.getElementById('ficha-derivacion-campos').addEventListener('submit', function (event) {
+				if (this.classList.contains('disabled')) {
+					event.preventDefault();
+					alert('Debe buscar y cargar un paciente válido antes de registrar la ficha.');
+				}
+			});
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
