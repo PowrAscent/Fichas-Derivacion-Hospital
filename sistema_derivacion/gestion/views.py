@@ -125,6 +125,21 @@ def modificar(request, id):
         context = {
             'derivacion': derivacion,
         }
+
+        if request.method == 'POST':
+            try:
+                derivacion.fecha_ingreso = request.POST.get('fecha_ingreso')
+                derivacion.motivo_derivacion = request.POST.get('motivo_derivacion')
+                derivacion.prestacion_requerida = request.POST.get('prestacion_requerida')
+                derivacion.gravedad = request.POST.get('gravedad')
+                derivacion.evaluacion = request.POST.get('evaluacion')
+
+                derivacion.save()
+
+                context['r'] = f'Ficha de derivación modificada con éxito para {derivacion.paciente.nombre}.'
+            except Exception as e:
+                context['r'] = f'Error inesperado: {str(e)}'
+
         return render(request, 'modificar.html', context)
 
 def listar(request):
@@ -149,3 +164,13 @@ def listar(request):
 
         return render(request, 'listar.html', context)
 
+
+def detalle_derivacion(request, id):
+    if request.session.get('estadoSesion') == True:
+        derivacion = Derivacion.objects.get(id=id)
+        context = {
+            'derivacion': derivacion,
+            'comorbilidades': derivacion.paciente.comorbilidades.all(),
+
+        }
+        return render(request, 'detalle_derivacion.html', context)

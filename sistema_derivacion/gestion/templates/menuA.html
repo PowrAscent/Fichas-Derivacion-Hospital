@@ -170,13 +170,12 @@
 							<div class="center-buttons mt-4 d-flex justify-content-center gap-3">
 								{% if rol != "medico" %}
 								<a class="btn btn-outline-primary px-4 py-2" href="/mostrar_registrar/">
-									<i class="bi bi-pencil-square me-2"></i> Registrar
+									<i class="bi bi-pencil-square me-2"></i> Registrar Derivacion
 								</a>
 								{% endif %}
-								<a class="btn btn-outline-warning px-4 py-2" href="/modificar/">
-									<i class="bi bi-pencil me-2"></i> Modificar
+								<a class="btn btn-outline-info px-4 py-2" href="/listar/">
+									<i class="bi bi-list-ul me-2"></i> Listar Derivaciones
 								</a>
-								<a class="btn btn-outline-info px-4 py-2" href="/listar/"> <i class="bi bi-list-ul me-2"></i> Listar </a>
 							</div>
 							{% if r %}
 							<div class="alert alert-success alert-dismissible fade show mt-4" role="alert">
