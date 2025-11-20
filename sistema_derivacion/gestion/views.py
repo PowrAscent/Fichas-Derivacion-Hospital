@@ -72,7 +72,6 @@ def registrar(request):
 
 def modificar(request):
     if 'estadoSesion' in request.session:
-        # r = None
         datos = {
             'correo': request.session.get('correo'),
             'rol': request.session.get('rol').lower()
