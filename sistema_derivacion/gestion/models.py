@@ -12,6 +12,7 @@ class Usuario(models.Model):
     ]
 
     rol = models.CharField(max_length=30, choices=TIPO_USUARIO)
+    especialidad = models.CharField(max_length=50, null=True, blank=True)
     def __str__(self):
         return f"{self.nombre} ({self.correo})"
 
@@ -37,7 +38,7 @@ class Derivacion(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     usuario_creador = models.ForeignKey(Usuario, on_delete=models.PROTECT)
     fecha_ingreso = models.DateField()
-    PREVISION_CHOICES = [('FONASA', 'FONASA'), ('ISAPRE', 'ISAPRE')]
+    PREVISION_CHOICES = [('FONASA', 'FONASA'), ('ISAPRE', 'ISAPRE'), ('DIPRECA', 'DIPRECA'), ('PARTICULAR', 'PARTICULAR')]
     tipo_prevision = models.CharField(max_length=10, choices=PREVISION_CHOICES)
     accidente_laboral = models.BooleanField()
     motivo_derivacion = models.TextField()
@@ -45,6 +46,26 @@ class Derivacion(models.Model):
     GRAVEDAD_CHOICES = [('BAJA', 'Baja'), ('MEDIA', 'Media'), ('ALTA', 'Alta'), ('CRITICA', 'Crítica')]
     gravedad = models.CharField(max_length=10, choices=GRAVEDAD_CHOICES)
     evaluacion = models.TextField()
+
+    # signos vitales
+    temperatura = models.FloatField()
+    presion_arterial = models.TextField()
+    frecuencia_cardiaca = models.IntegerField()
+    frecuencia_respiratoria = models.IntegerField()
+    saturacion_oxigeno = models.IntegerField()
+
+    # datos nuevos ingresados
+    antecedentes = models.TextField()
+    alergias = models.TextField()
+
+    pendiente = models.BooleanField(default=True)
+
+    medico_asignado = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, related_name='derivaciones_asignadas')
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+
+
 
     def lista_comorbilidades(self):
         return self.paciente.comorbilidades.all()

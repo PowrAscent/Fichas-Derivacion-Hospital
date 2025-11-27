@@ -159,10 +159,10 @@
 										<tr>
 											<th>ID</th>
 											<th>RUT</th>
-											<th>Nombre Completo</th>
+											<th>Nombre</th>
 											<th>Edad</th>
 											<th class="d-none d-lg-table-cell">Género</th>
-											<th>Comorbilidades</th>
+											<th class="text-center">Comorbilidades</th>
 											<th>Acciones</th>
 										</tr>
 									</thead>
@@ -172,9 +172,9 @@
 											<td>{{ paciente.id }}</td>
 											<td><strong>{{ paciente.rut }}</strong></td>
 											<td>{{ paciente.nombre }}</td>
-											<td>{{ paciente.edad }}</td>
-											<td class="d-none d-lg-table-cell">{{ paciente.genero }}</td>
-											<td>
+											<td class="text-center">{{ paciente.edad }}</td>
+											<td class="d-none d-lg-table-cell text-center">{{ paciente.genero }}</td>
+											<td class="text-center">
 												{% for comorbilidad in paciente.comorbilidades.all %}
 												<span class="badge text-bg-warning me-1 mb-1">{{ comorbilidad.nombre }}</span>
 												{% empty %}

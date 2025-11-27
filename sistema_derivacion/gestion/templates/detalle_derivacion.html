@@ -117,6 +117,14 @@
 				padding: 10px;
 				border-radius: 4px;
 				white-space: pre-wrap; /* Mantiene saltos de línea en textarea */
+				font-size: 0.95rem;
+				color: #1e1f22;
+			}
+
+			.sv-box {
+				background-color: #f0f3f8;
+				padding: 1rem;
+				border-radius: 8px;
 			}
 
 			/* Footer */
@@ -152,8 +160,12 @@
 						<div class="card card-hrr">
 							<h1 class="hero-title mb-1">Ficha de Derivación #{{ derivacion.id }}</h1>
 							<p class="hero-subtitle mb-4">
-								Creada por {{ derivacion.usuario_creador.nombre }} ({{ derivacion.usuario_creador.rol|default:"N/A" }}) el
-								{{derivacion.fecha_ingreso|date:"d-m-Y"}}
+								Creada por **{{ derivacion.usuario_creador.nombre }}** ({{ derivacion.usuario_creador.rol|default:"N/A" }})
+								el {{ derivacion.fecha_ingreso }} {% if not derivacion.pendiente %}
+								<span class="badge text-bg-success ms-2">APROBADA</span>
+								{% else %}
+								<span class="badge text-bg-warning ms-2">PENDIENTE</span>
+								{% endif %}
 							</p>
 
 							<h4 class="detail-section-title"><i class="bi bi-person-fill me-2"></i> Datos del Paciente</h4>
@@ -164,7 +176,7 @@
 								</div>
 								<div class="col-md-6 mb-3">
 									<p class="detail-field mb-1">RUT:</p>
-									<p class="detail-value mb-0"><strong>{{ derivacion.paciente.rut }}</strong></p>
+									<p class="detail-value mb-0">{{ derivacion.paciente.rut }}</p>
 								</div>
 								<div class="col-md-6 mb-3">
 									<p class="detail-field mb-1">Edad:</p>
@@ -177,7 +189,7 @@
 								<div class="col-12 mt-2">
 									<p class="detail-field mb-1">Comorbilidades:</p>
 									<div>
-										{% for com in comorbilidades %}
+										{% for com in derivacion.paciente.comorbilidades.all %}
 										<span class="badge text-bg-warning me-1">{{ com.nombre }}</span>
 										{% empty %}
 										<span class="text-muted">Ninguna registrada.</span>
@@ -188,19 +200,15 @@
 
 							<h4 class="detail-section-title mt-4"><i class="bi bi-file-text me-2"></i> Detalles de la Derivación</h4>
 							<div class="row mb-4">
-								<div class="col-md-6 mb-3">
-									<p class="detail-field mb-1">Fecha de Ingreso:</p>
-									<p class="detail-value mb-0">{{ derivacion.fecha_ingreso|date:"d-m-Y"|default:"N/A" }}</p>
-								</div>
-								<div class="col-md-6 mb-3">
-									<p class="detail-field mb-1">Tipo de Previsión:</p>
+								<div class="col-md-4 mb-3">
+									<p class="detail-field mb-1">Previsión:</p>
 									<p class="detail-value mb-0">{{ derivacion.tipo_prevision }}</p>
 								</div>
-								<div class="col-md-6 mb-3">
+								<div class="col-md-4 mb-3">
 									<p class="detail-field mb-1">Accidente Laboral:</p>
 									<p class="detail-value mb-0">{% if derivacion.accidente_laboral %}Sí{% else %}No{% endif %}</p>
 								</div>
-								<div class="col-md-6 mb-3">
+								<div class="col-md-4 mb-3">
 									<p class="detail-field mb-1">Gravedad:</p>
 									<p class="detail-value mb-0">
 										<span
@@ -212,17 +220,64 @@
 								</div>
 
 								<div class="col-12 mt-3">
-									<p class="detail-field mb-1">Motivo de Derivación:</p>
-									<div class="detail-value-box">{{ derivacion.motivo_derivacion }}</div>
+									<p class="detail-field mb-1">Médico Asignado:</p>
+									<p class="detail-value mb-0">
+										{% if derivacion.medico_asignado %} {{ derivacion.medico_asignado.nombre }} (<span
+											>{{ derivacion.medico_asignado.especialidad }})</span
+										>
+										{% else %}
+										<span class="text-muted">Pendiente de asignación.</span>
+										{% endif %}
+									</p>
 								</div>
 
 								<div class="col-12 mt-3">
+									<p class="detail-field mb-1">Antecedentes:</p>
+									<div class="detail-value-box">{{ derivacion.antecedentes|default:"No registrado" }}</div>
+								</div>
+
+								<div class="col-12 mt-3">
+									<p class="detail-field mb-1">Alergias:</p>
+									<div class="detail-value-box">{{ derivacion.alergias|default:"Niega" }}</div>
+								</div>
+							</div>
+
+							<h4 class="detail-section-title mt-4"><i class="bi bi-heart-pulse-fill me-2"></i> Signos Vitales</h4>
+							<div class="row mb-4 sv-box">
+								<div class="col-md-4 mb-2">
+									<p class="detail-field mb-1 small">T° Corporal:</p>
+									<p class="detail-value mb-0">{{ derivacion.temperatura|default:"N/A" }} °C</p>
+								</div>
+								<div class="col-md-4 mb-2">
+									<p class="detail-field mb-1 small">P. Arterial (CSV):</p>
+									<p class="detail-value mb-0">{{ derivacion.presion_arterial|default:"N/A" }} mmHg</p>
+								</div>
+								<div class="col-md-4 mb-2">
+									<p class="detail-field mb-1 small">F. Cardíaca (FC):</p>
+									<p class="detail-value mb-0">{{ derivacion.frecuencia_cardiaca|default:"N/A" }} lpm</p>
+								</div>
+								<div class="col-md-4 mb-2">
+									<p class="detail-field mb-1 small">F. Respiratoria (FR):</p>
+									<p class="detail-value mb-0">{{ derivacion.frecuencia_respiratoria|default:"N/A" }} x'</p>
+								</div>
+								<div class="col-md-4 mb-2">
+									<p class="detail-field mb-1 small">Saturación O2:</p>
+									<p class="detail-value mb-0">{{ derivacion.saturacion_oxigeno|default:"N/A" }} %</p>
+								</div>
+							</div>
+
+							<h4 class="detail-section-title mt-4"><i class="bi bi-clipboard-data me-2"></i> Reporte Clínico</h4>
+							<div class="row mb-4">
+								<div class="col-12 mb-3">
+									<p class="detail-field mb-1">Motivo de Consulta:</p>
+									<div class="detail-value-box">{{ derivacion.motivo_derivacion }}</div>
+								</div>
+								<div class="col-12 mb-3">
 									<p class="detail-field mb-1">Prestación Requerida:</p>
 									<div class="detail-value-box">{{ derivacion.prestacion_requerida }}</div>
 								</div>
-
-								<div class="col-12 mt-3">
-									<p class="detail-field mb-1">Evaluación:</p>
+								<div class="col-12 mb-3">
+									<p class="detail-field mb-1">Evaluación / Indicaciones:</p>
 									<div class="detail-value-box">{{ derivacion.evaluacion }}</div>
 								</div>
 							</div>

@@ -77,6 +77,10 @@ def registrar(request):
 
     context = {}
 
+    medicos = Usuario.objects.filter(rol='MEDICO')
+
+    context['medicos'] = medicos
+
     if request.method == 'POST':
         action = request.POST.get('action')
 
@@ -107,15 +111,23 @@ def registrar(request):
                 usuario_creador = Usuario.objects.get(pk=usuario_id)
 
                 Derivacion.objects.create(
-                    paciente=paciente,
-                    usuario_creador=usuario_creador,
-                    fecha_ingreso=request.POST.get('fecha_ingreso'),
-                    tipo_prevision=request.POST.get('prevision'),
-                    accidente_laboral=request.POST.get('accidente_laboral') == 'True',
-                    motivo_derivacion=request.POST.get('motivo_derivacion'),
+                    paciente = paciente,
+                    usuario_creador = usuario_creador,
+                    fecha_ingreso = request.POST.get('fecha_ingreso'),
+                    tipo_prevision = request.POST.get('prevision'),
+                    accidente_laboral = request.POST.get('accidente_laboral') == 'True',
+                    motivo_derivacion = request.POST.get('motivo_derivacion'),
                     prestacion_requerida=request.POST.get('prestacion_requerida'),
-                    gravedad=request.POST.get('gravedad'),
-                    evaluacion=request.POST.get('evaluacion'),
+                    gravedad = request.POST.get('gravedad'),
+                    evaluacion = request.POST.get('evaluacion'),
+                    antecedentes = request.POST.get('antecedentes'),
+                    alergias = request.POST.get('alergias'),
+                    presion_arterial = request.POST.get('csv'),
+                    frecuencia_cardiaca = request.POST.get('fc'),
+                    temperatura = request.POST.get('temperatura'),
+                    frecuencia_respiratoria = request.POST.get('fr'),
+                    saturacion_oxigeno = request.POST.get('sato2'),
+                    medico_asignado_id = request.POST.get('medico'),
                 )
                 context['r'] = f'Ficha de derivación registrada con éxito para {paciente.nombre}.'
 
@@ -135,18 +147,32 @@ def modificar(request, id):
 
 
     derivacion = Derivacion.objects.get(id=id)
+    medicos = Usuario.objects.filter(rol='MEDICO')
+
+
     context = {
         'derivacion': derivacion,
+        'medicos': medicos
     }
 
+    print(derivacion)
 
     if request.method == 'POST':
         try:
+
             derivacion.fecha_ingreso = request.POST.get('fecha_ingreso')
             derivacion.motivo_derivacion = request.POST.get('motivo_derivacion')
             derivacion.prestacion_requerida = request.POST.get('prestacion_requerida')
             derivacion.gravedad = request.POST.get('gravedad')
             derivacion.evaluacion = request.POST.get('evaluacion')
+            derivacion.antecedentes = request.POST.get('antecedentes')
+            derivacion.alergias = request.POST.get('alergias')
+            derivacion.presion_arterial = request.POST.get('csv')
+            derivacion.frecuencia_cardiaca = request.POST.get('fc')
+            derivacion.temperatura = request.POST.get('temperatura')
+            derivacion.frecuencia_respiratoria = request.POST.get('fr')
+            derivacion.saturacion_oxigeno = request.POST.get('sato2')
+            derivacion.medico_asignado_id = request.POST.get('medico')
             derivacion.save()
 
             usuario_id = request.session.get('id')

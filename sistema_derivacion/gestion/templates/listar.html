@@ -165,6 +165,7 @@
 											<th>Fecha Ingreso</th>
 											<th>Gravedad</th>
 											<th class="d-none d-lg-table-cell">Motivo derivación</th>
+											<th>Estado Derivacion</th>
 											<th>Acciones</th>
 										</tr>
 									</thead>
@@ -184,6 +185,13 @@
 												</span>
 											</td>
 											<td class="d-none d-lg-table-cell">{{ derivacion.motivo_derivacion|truncatechars:50 }}</td>
+											<td>
+												{% if derivacion.pendiente %}
+												<span class="badge text-bg-warning">Pendiente / En Revisión</span>
+												{% else %}
+												<span class="badge text-bg-success">Aprobada</span>
+												{% endif %}
+											</td>
 											<td>
 												<a
 													class="btn btn-outline-info btn-sm me-1"
