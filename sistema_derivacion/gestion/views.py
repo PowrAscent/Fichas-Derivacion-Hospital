@@ -245,3 +245,80 @@ def historial_derivaciones(request, id):
         'paciente': paciente,
     }
     return render(request, 'historial_paciente.html', context)
+
+def derivaciones_pendientes(request):
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
+
+
+    medico_id = request.session.get('id')
+
+
+    derivaciones = Derivacion.objects.filter(
+        pendiente=True,
+        medico_asignado_id=medico_id
+    ).order_by('fecha_creacion')
+
+    rut_buscado = request.GET.get('rut')
+    if rut_buscado:
+        derivaciones = derivaciones.filter(
+            paciente__rut__icontains=rut_buscado
+        )
+
+    context = {
+        'derivaciones': derivaciones,
+        'rut_buscado': rut_buscado,
+    }
+
+    return render(request, 'derivaciones_pendientes.html', context)
+
+def revisar_derivacion(request, id):
+    if request.session.get('estadoSesion') != True:
+        return redirect('/login/')
+
+    derivacion = Derivacion.objects.get(id=id)
+
+    context = {
+        'derivacion': derivacion,
+
+    }
+
+    if request.method == 'POST':
+        try:
+
+            derivacion.fecha_ingreso = request.POST.get('fecha_ingreso')
+            derivacion.motivo_derivacion = request.POST.get('motivo_derivacion')
+            derivacion.prestacion_requerida = request.POST.get('prestacion_requerida')
+            derivacion.gravedad = request.POST.get('gravedad')
+            derivacion.evaluacion = request.POST.get('evaluacion')
+            derivacion.antecedentes = request.POST.get('antecedentes')
+            derivacion.alergias = request.POST.get('alergias')
+            derivacion.presion_arterial = request.POST.get('csv')
+            derivacion.frecuencia_cardiaca = request.POST.get('fc')
+            derivacion.temperatura = request.POST.get('temperatura')
+            derivacion.frecuencia_respiratoria = request.POST.get('fr')
+            derivacion.saturacion_oxigeno = request.POST.get('sato2')
+            derivacion.medico_asignado_id = request.POST.get('medico')
+
+            aprobacion = request.POST.get('aprobacion')
+
+            context['r'] = f'Ficha de derivación modificada con éxito para {derivacion.paciente.nombre}.'
+            if aprobacion == 'pendiente':
+                derivacion.pendiente = True
+            else:
+                derivacion.pendiente = False
+                context['r'] = f'Ficha de derivación aprobada con éxito para {derivacion.paciente.nombre}.'
+
+            derivacion.save()
+
+            usuario_id = request.session.get('id')
+            usuario_modificador = Usuario.objects.get(pk=usuario_id)
+            HistorialModificacion.objects.create(
+                derivacion=derivacion,
+                usuario_modificador=usuario_modificador
+            )
+
+        except Exception as e:
+            context['r'] = f'Error inesperado: {str(e)}'
+
+    return render(request, 'revisar_derivacion.html', context)
