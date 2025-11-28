@@ -381,11 +381,27 @@
 
 								<input type="hidden" name="medico_asignado" value="{{ derivacion.medico_asignado.id }}" />
 
+								<!-- NUEVA SECCIÓN: Asignar Cama -->
+								<h5 class="mt-5 mb-3 text-secondary border-bottom pb-2">
+									<i class="bi bi-door-open me-2"></i> Asignación de Cama
+								</h5>
+
+								<p class="text-muted mb-3">
+									A continuación puede revisar la disponibilidad de camas en los hospitales y asignar una a este paciente.
+								</p>
+
+								<div class="center-buttons mt-2">
+									<a href="/asignar_camas/{{ derivacion.id }}" class="btn btn-outline-success px-4 py-2">
+										<i class="bi bi-hospital-bed me-2"></i> Ver Disponibilidad de Camas
+									</a>
+								</div>
+
 								<div class="center-buttons mt-4">
 									<button type="submit" class="btn btn-gradient px-4 py-2">
 										<i class="bi bi-check-circle me-2"></i> Confirmar Derivacion
 									</button>
 								</div>
+
 
 								<div class="center-buttons mt-3">
 									<a href="/derivaciones_pendientes/" class="btn btn-outline-secondary px-4 py-2">

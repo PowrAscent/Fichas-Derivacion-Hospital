@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Asignación de Camas — HRR</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+    <style>
+        :root {
+            --hrr-dark-green: rgb(105, 135, 27);
+            --hrr-light-green: rgb(157, 189, 72);
+            --hrr-gradient: linear-gradient(90deg, var(--hrr-dark-green), var(--hrr-light-green));
+            --hrr-dark: #1e1f22;
+        }
+
+        body {
+            background: linear-gradient(180deg, rgba(105,135,27,.12), rgba(157,189,72,.12)), #f6f8f5;
+            font-family: "Roboto", sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--hrr-dark);
+            box-shadow: 0 2px 16px rgba(0,0,0,.1);
+        }
+
+        .card-hrr {
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+            background: #fff;
+        }
+
+        .cama-disponible {
+            background: rgba(72, 157, 54, 0.12);
+            color: rgb(42, 112, 27);
+            border-left: 5px solid rgb(72, 157, 54);
+        }
+
+        .cama-ocupada {
+            background: rgba(200, 40, 40, 0.12);
+            color: rgb(142, 20, 20);
+            border-left: 5px solid rgb(200, 40, 40);
+        }
+
+        .badge-dispo {
+            background-color: #4caf50;
+        }
+        .badge-ocu {
+            background-color: #f44336;
+        }
+
+        .btn-gradient {
+            background-image: var(--hrr-gradient);
+            color: #fff;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/menuA/">
+            <i class="bi bi-hospital fs-4 text-success"></i>
+            <span>Hospital Regional de Rancagua</span>
+        </a>
+    </div>
+</nav>
+
+<main class="main-wrap py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="card-hrr">
+
+                    <!-- Título -->
+                    <h2 class="mb-3">
+                        Disponibilidad de Camas
+                    </h2>
+                    <p class="text-muted">
+                        Seleccione una cama disponible para asignarla al paciente.
+                    </p>
+
+                    <!-- Filtro -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Filtrar por sala</label>
+                        <select class="form-select" id="filtroSala" onchange="filtrarSala()">
+                            <option value="TODAS">Todas las salas</option>
+                            {% for c in camas %}
+                                <option value="{{ c.sala }}">{{ c.sala }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Tabla -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Sala</th>
+                                    <th>Cama</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaCamas">
+                                {% for c in camas %}
+                                <tr data-id="{{ c.id }}" class="{% if c.estado == 'DISPONIBLE' %}cama-disponible{% else %}cama-ocupada{% endif %}">
+                                    <td>{{ c.sala }}</td>
+                                    <td>{{ c.cama }}</td>
+                                    <td>
+                                        {% if c.estado == 'DISPONIBLE' %}
+                                            <span class="badge badge-dispo text-light">Disponible</span>
+                                        {% else %}
+                                            <span class="badge badge-ocu text-light">Ocupada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.estado == 'DISPONIBLE' %}
+                                            <button 
+                                                class="btn btn-sm btn-success btn-asignar"
+                                                onclick="asignarCama(this)">
+                                                Asignar
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-danger btn-asignar" onclick="asignarCama(this)">
+                                                No disponible
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Botón volver -->
+                    <div class="mt-4 text-center">
+                        <a href="/revisar_derivacion/{{ derivacion_id }}/" class="btn btn-outline-secondary px-4 py-2">
+                            <i class="bi bi-arrow-left"></i> Volver a la Derivación
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+// Cargar estados guardados al inicio
+document.addEventListener("DOMContentLoaded", function() {
+    let estadosGuardados = JSON.parse(localStorage.getItem("camasEstado")) || {};
+
+    document.querySelectorAll("#tablaCamas tr").forEach(fila => {
+        let camaId = fila.dataset.id;
+        let estadoGuardado = estadosGuardados[camaId];
+
+        if (estadoGuardado === "OCUPADA") {
+            aplicarOcupada(fila);
+        } else if (estadoGuardado === "DISPONIBLE") {
+            aplicarDisponible(fila);
+        }
+    });
+});
+
+function asignarCama(btn) {
+    const fila = btn.closest("tr");
+    const camaId = fila.dataset.id;
+
+    let estadosGuardados = JSON.parse(localStorage.getItem("camasEstado")) || {};
+
+    // Alternar estado
+    if (fila.classList.contains("cama-disponible")) {
+        aplicarOcupada(fila);
+        estadosGuardados[camaId] = "OCUPADA";
+    } else {
+        aplicarDisponible(fila);
+        estadosGuardados[camaId] = "DISPONIBLE";
+    }
+
+    // Guardar en localStorage
+    localStorage.setItem("camasEstado", JSON.stringify(estadosGuardados));
+}
+
+// --------- Funciones visuales reutilizables -----------
+
+function aplicarOcupada(fila) {
+    const estadoCelda = fila.children[2];
+    const btn = fila.children[3].querySelector("button");
+
+    // Cambiar fila
+    fila.classList.remove("cama-disponible");
+    fila.classList.add("cama-ocupada");
+
+    // Cambiar estado visual
+    estadoCelda.innerHTML = `<span class="badge badge-ocu text-light">Ocupada</span>`;
+
+    // Cambiar botón
+    btn.classList.remove("btn-success");
+    btn.classList.add("btn-danger");
+    btn.textContent = "No disponible";
+}
+
+function aplicarDisponible(fila) {
+    const estadoCelda = fila.children[2];
+    const btn = fila.children[3].querySelector("button");
+
+    // Cambiar fila
+    fila.classList.remove("cama-ocupada");
+    fila.classList.add("cama-disponible");
+
+    // Cambiar badge
+    estadoCelda.innerHTML = `<span class="badge badge-dispo text-light">Disponible</span>`;
+
+    // Cambiar botón
+    btn.classList.remove("btn-danger");
+    btn.classList.add("btn-success");
+    btn.textContent = "Asignar";
+}
+
+// Filtro por sala
+function filtrarSala() {
+    let seleccion = document.getElementById("filtroSala").value.toUpperCase();
+    let filas = document.querySelectorAll("#tablaCamas tr");
+
+    filas.forEach(f => {
+        let sala = f.children[0].textContent.toUpperCase();
+        f.style.display = (seleccion === "TODAS" || sala === seleccion) ? "" : "none";
+    });
+}
+</script>
+
