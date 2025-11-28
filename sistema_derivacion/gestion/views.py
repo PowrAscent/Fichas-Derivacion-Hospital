@@ -193,14 +193,16 @@ def listar(request):
     if request.session.get('estadoSesion') != True:
         return redirect('/login/')
 
+
+
     rut_buscado = request.GET.get('rut', '').strip()
 
-    derivaciones = Derivacion.objects.select_related('paciente').all().order_by('-fecha_ingreso')
+    derivaciones = Derivacion.objects.select_related('paciente').all().order_by('fecha_creacion')
 
     if rut_buscado:
         derivaciones = derivaciones.filter(paciente__rut__icontains=rut_buscado)
 
-    paginator = Paginator(derivaciones, 5) 
+    paginator = Paginator(derivaciones, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -235,13 +237,13 @@ def listar_pacientes(request):
     if rut_buscado:
         pacientes = pacientes.filter(rut__icontains=rut_buscado)
 
-    #Paginador aquiiiiiiii !
-    paginator = Paginator(pacientes, 3) #aqui como hay pocos pacientes puse 3
+
+    paginator = Paginator(pacientes, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     context = {
-        'pacientes': page_obj, #se cambió pacientes por page_obj
+        'pacientes': page_obj,
         'rut_buscado': rut_buscado,
         'page_obj': page_obj,
     }
@@ -256,17 +258,17 @@ def historial_derivaciones(request, id):
     paciente = Paciente.objects.get(id=id)
     derivaciones = Derivacion.objects.filter(paciente=paciente).order_by('-fecha_ingreso')
 
-    #paginador
 
-    paginator = Paginator(derivaciones, 5)
+
+    paginator = Paginator(derivaciones, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
-        'derivaciones': page_obj, #derivaciones por page_obj
+        'derivaciones': page_obj,
         'comorbilidades': paciente.comorbilidades.all(),
         'paciente': paciente,
         'page_obj': page_obj
-    #fin pagiandor
+
     }
     return render(request, 'historial_paciente.html', context)
 def derivaciones_pendientes(request):
@@ -287,14 +289,14 @@ def derivaciones_pendientes(request):
         derivaciones = derivaciones.filter(
             paciente__rut__icontains=rut_buscado
         )
-    #PAGINADOR aqui abajooooo!!! ---------------INICIO
+
     paginator = Paginator (derivaciones, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
 
     context = {
-        'derivaciones': page_obj, #SE CAMBIO derivaciones POR page_obj
+        'derivaciones': page_obj,
         'rut_buscado': rut_buscado,
         'page_obj': page_obj,
     }
@@ -366,6 +368,6 @@ def asignar_camas(request, id):
 
     return render(request, "asignar_camas.html", {
         "camas": camas,
-        "derivacion_id": id 
+        "derivacion_id": id
     })
 

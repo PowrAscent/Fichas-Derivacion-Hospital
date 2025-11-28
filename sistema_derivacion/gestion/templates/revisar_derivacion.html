@@ -362,8 +362,14 @@
 									<div class="col-md-6">
 										<label for="hospital_receptor" class="form-label">Hospital Receptor</label>
 										<select class="form-select" id="hospital_receptor" name="hospital_receptor" required>
-											<option value="">Seleccione una opcion</option>
-											<option value="">Hopital Santiago</option>
+											<option value=""></option>
+											<div class="col-md-6">
+        										<option value="">--- Seleccionar Destino ---</option>
+        										<option value="1">Hospital Regional de Rancagua </option>
+        										<option value="2">Clínica RedSalud Rancagua</option>
+        										<option value="3" >Hospital Clínico FUSAT</option>
+        										<option value="4">Hospital de San Fernando</option>
+        										<option value="5" >Hospital de Rengo</option>
 										</select>
 									</div>
 									<div class="col-md-6">
@@ -381,7 +387,6 @@
 
 								<input type="hidden" name="medico_asignado" value="{{ derivacion.medico_asignado.id }}" />
 
-								
 								<h5 class="mt-5 mb-3 text-secondary border-bottom pb-2">
 									<i class="bi bi-door-open me-2"></i> Asignación de Cama
 								</h5>
@@ -401,7 +406,6 @@
 										<i class="bi bi-check-circle me-2"></i> Confirmar Derivacion
 									</button>
 								</div>
-
 
 								<div class="center-buttons mt-3">
 									<a href="/derivaciones_pendientes/" class="btn btn-outline-secondary px-4 py-2">
