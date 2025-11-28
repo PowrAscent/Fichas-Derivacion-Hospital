@@ -5,6 +5,7 @@ from gestion.models import Derivacion
 from gestion.models import HistorialModificacion
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect
+from django.core.paginator import Paginator
 import hashlib
 
 # Create your views here.
@@ -193,15 +194,22 @@ def listar(request):
         return redirect('/login/')
 
     rut_buscado = request.GET.get('rut', '').strip()
+
     derivaciones = Derivacion.objects.select_related('paciente').all().order_by('-fecha_ingreso')
+
     if rut_buscado:
-        derivaciones = derivaciones.filter(
-            paciente__rut__icontains=rut_buscado
-        )
+        derivaciones = derivaciones.filter(paciente__rut__icontains=rut_buscado)
+
+    paginator = Paginator(derivaciones, 5) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'derivaciones': derivaciones,
+        'derivaciones': page_obj,
         'rut_buscado': rut_buscado,
+        'page_obj': page_obj
     }
+
     return render(request, 'listar.html', context)
 
 
