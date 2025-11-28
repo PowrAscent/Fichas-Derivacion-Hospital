@@ -282,8 +282,8 @@ def derivaciones_pendientes(request):
         medico_asignado_id=medico_id
     ).order_by('fecha_creacion')
 
-    rut_buscado = request.GET.get('rut')
-    if rut_buscado:
+    rut_buscado = request.GET.get('rut', ''). strip()
+    if rut_buscado != '':
         derivaciones = derivaciones.filter(
             paciente__rut__icontains=rut_buscado
         )
