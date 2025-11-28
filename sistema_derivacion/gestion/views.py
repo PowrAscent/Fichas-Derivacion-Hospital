@@ -366,6 +366,6 @@ def asignar_camas(request, id):
 
     return render(request, "asignar_camas.html", {
         "camas": camas,
-        "derivacion_id": id   # ← IMPORTANTE
+        "derivacion_id": id 
     })
 

@@ -152,7 +152,7 @@
 </main>
 
 <script>
-// Cargar estados guardados al inicio
+
 document.addEventListener("DOMContentLoaded", function() {
     let estadosGuardados = JSON.parse(localStorage.getItem("camasEstado")) || {};
 
@@ -183,11 +183,11 @@ function asignarCama(btn) {
         estadosGuardados[camaId] = "DISPONIBLE";
     }
 
-    // Guardar en localStorage
+
     localStorage.setItem("camasEstado", JSON.stringify(estadosGuardados));
 }
 
-// --------- Funciones visuales reutilizables -----------
+
 
 function aplicarOcupada(fila) {
     const estadoCelda = fila.children[2];
@@ -223,7 +223,7 @@ function aplicarDisponible(fila) {
     btn.textContent = "Asignar";
 }
 
-// Filtro por sala
+
 function filtrarSala() {
     let seleccion = document.getElementById("filtroSala").value.toUpperCase();
     let filas = document.querySelectorAll("#tablaCamas tr");
