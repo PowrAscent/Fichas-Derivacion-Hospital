@@ -16,4 +16,5 @@ urlpatterns = [
     path('paciente/<int:id>/historial/', views.historial_derivaciones),
     path('derivaciones_pendientes/', views.derivaciones_pendientes),
     path('revisar_derivacion/<int:id>/', views.revisar_derivacion),
+    path('asignar_camas/<int:id>/', views.asignar_camas)
 ]

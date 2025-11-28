@@ -352,3 +352,20 @@ def revisar_derivacion(request, id):
             context['r'] = f'Error inesperado: {str(e)}'
 
     return render(request, 'revisar_derivacion.html', context)
+
+
+def asignar_camas(request, id):
+    camas = [
+        {"id": 1, "sala": "UCI", "cama": "C-01", "estado": "DISPONIBLE"},
+        {"id": 2, "sala": "UCI", "cama": "C-02", "estado": "OCUPADA"},
+        {"id": 3, "sala": "UCI", "cama": "C-03", "estado": "DISPONIBLE"},
+        {"id": 4, "sala": "Medicina", "cama": "M-12", "estado": "OCUPADA"},
+        {"id": 5, "sala": "Medicina", "cama": "M-13", "estado": "DISPONIBLE"},
+        {"id": 6, "sala": "Trauma", "cama": "T-03", "estado": "DISPONIBLE"},
+    ]
+
+    return render(request, "asignar_camas.html", {
+        "camas": camas,
+        "derivacion_id": id   # ← IMPORTANTE
+    })
+
