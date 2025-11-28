@@ -235,10 +235,18 @@ def listar_pacientes(request):
     if rut_buscado:
         pacientes = pacientes.filter(rut__icontains=rut_buscado)
 
+    #Paginador aquiiiiiiii !
+    paginator = Paginator(pacientes, 3) #aqui como hay pocos pacientes puse 3
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'pacientes': pacientes,
-        'rut_buscado': rut_buscado
+        'pacientes': page_obj, #se cambió pacientes por page_obj
+        'rut_buscado': rut_buscado,
+        'page_obj': page_obj,
     }
+
+    #fin paginador
     return render(request, 'listar_pacientes.html', context)
 
 def historial_derivaciones(request, id):
@@ -247,13 +255,20 @@ def historial_derivaciones(request, id):
 
     paciente = Paciente.objects.get(id=id)
     derivaciones = Derivacion.objects.filter(paciente=paciente).order_by('-fecha_ingreso')
+
+    #paginador
+
+    paginator = Paginator(derivaciones, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'derivaciones': derivaciones,
+        'derivaciones': page_obj, #derivaciones por page_obj
         'comorbilidades': paciente.comorbilidades.all(),
         'paciente': paciente,
+        'page_obj': page_obj
+    #fin pagiandor
     }
     return render(request, 'historial_paciente.html', context)
-
 def derivaciones_pendientes(request):
     if request.session.get('estadoSesion') != True:
         return redirect('/login/')
@@ -272,13 +287,20 @@ def derivaciones_pendientes(request):
         derivaciones = derivaciones.filter(
             paciente__rut__icontains=rut_buscado
         )
+    #PAGINADOR aqui abajooooo!!! ---------------INICIO
+    paginator = Paginator (derivaciones, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
 
     context = {
-        'derivaciones': derivaciones,
+        'derivaciones': page_obj, #SE CAMBIO derivaciones POR page_obj
         'rut_buscado': rut_buscado,
+        'page_obj': page_obj,
     }
 
     return render(request, 'derivaciones_pendientes.html', context)
+#PAGINADOR --------------------------FIN
 
 def revisar_derivacion(request, id):
     if request.session.get('estadoSesion') != True:
