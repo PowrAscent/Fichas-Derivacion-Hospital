@@ -204,6 +204,48 @@
 							{% else %}
 							<div class="alert alert-info text-center">Este paciente no tiene derivaciones registradas en el sistema.</div>
 							{% endif %}
+							
+							<!--paginador-->
+							{% if derivaciones.has_other_pages %}
+							<nav class="mt-4" aria-label="Paginación">
+								<ul class="pagination justify-content-center">
+
+									{% if derivaciones.has_previous %}
+									<li class="page-item">
+										<a class="page-link" href="?page={{ derivaciones.previous_page_number }}">
+											Anterior
+										</a>
+									</li>
+									{% else %}
+									<li class="page-item disabled"><span class="page-link">Anterior</span></li>
+									{% endif %}
+
+									{% for num in derivaciones.paginator.page_range %}
+										{% if num == derivaciones.number %}
+											<li class="page-item active"><span class="page-link">{{ num }}</span></li>
+										{% else %}
+											<li class="page-item">
+												<a class="page-link" href="?page={{ num }}">{{ num }}</a>
+											</li>
+										{% endif %}
+									{% endfor %}
+
+									{% if derivaciones.has_next %}
+									<li class="page-item">
+										<a class="page-link" href="?page={{ derivaciones.next_page_number }}">
+											Siguiente
+										</a>
+									</li>
+									{% else %}
+									<li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+									{% endif %}
+
+								</ul>
+							</nav>
+							{% endif %}
+							
+							<!--finalizar pagiandor-->
+
 
 							<div class="center-buttons mt-4 d-flex justify-content-center gap-3">
 								<a href="/pacientes/" class="btn btn-outline-secondary px-4 py-2">
