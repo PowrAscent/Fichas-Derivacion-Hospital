@@ -132,7 +132,7 @@
 											/>
 											<button class="btn btn-gradient" type="submit"><i class="bi bi-search me-1"></i> Buscar</button>
 
-											{% if rut_buscado %}
+											{% if rut_buscado|length > 0 %}
 											<a href="/derivaciones_pendientes/" class="btn btn-outline-danger" title="Limpiar filtro">
 												<i class="bi bi-x-circle"></i> Limpiar
 											</a>
